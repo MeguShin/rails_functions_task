@@ -8,11 +8,19 @@ class UsersController < ApplicationController
 
   def create
     @user = User.new(user_params)
-    if @user.save
-      log_in(@user)
-      redirect_to user_path(@user.id), notice: 'アカウントを登録しました。'
-    else
-      render :new
+
+    respond_to do |format|
+      if @user.save
+        log_in(@user)
+        UserMailer.with(to: @user.email, name: @user.name).welcome.deliver_now # 追加
+        format.html { redirect_to user_path(@user.id), notice: 'アカウントを登録しました。' }
+        format.json { render :show, status: :created, location: @user }
+        #redirect_to user_path(@user.id), notice: 'アカウントを登録しました。'
+      else
+        format.html { render :new }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
+        #render :new
+      end
     end
   end
 
@@ -23,7 +31,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:name, :email, :password, :password_confirmation)
+    params.require(:user).permit(:name, :email, :password, :password_confirmation, :profile_image)
   end
 
   def correct_user
