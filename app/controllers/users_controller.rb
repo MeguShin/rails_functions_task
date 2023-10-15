@@ -12,7 +12,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       if @user.save
         log_in(@user)
-        UserMailer.with(to: @user.email, name: @user.name).welcome.deliver_now # 追加
+        UserMailer.with(to: @user.email, name: @user.name).welcome.deliver_later # 追加
         format.html { redirect_to user_path(@user.id), notice: 'アカウントを登録しました。' }
         format.json { render :show, status: :created, location: @user }
         #redirect_to user_path(@user.id), notice: 'アカウントを登録しました。'
